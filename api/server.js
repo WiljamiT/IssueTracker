@@ -3,9 +3,13 @@ const { GraphQLScalarType } = require('graphql');
 const { Kind } = require('graphql/language');
 const { MongoClient } = require('mongodb');
 
+require('dotenv').config();
+
 let db;
 
-const url = 'mongodb://localhost/IssueTracker';
+const url = process.env.DB_URL;
+
+const port = process.env.API_SERVER_PORT;
 
 const express = require('express');
 const {
@@ -44,28 +48,6 @@ function validateIssue(_, { issue }) {
     throw new UserInputError('Invalid input(s)', { errors });
     }
 }
-
-// const issuesDB = [{
-//     id: 1,
-//     status: 'New',
-//     owner: 'Ravan',
-//     effort: 5,
-//     created: new Date('2019-01-15'),
-//     due: undefined,
-//     title: 'Error in console when clicking Add',
-// },
-// {
-//     id: 2,
-//     status: 'Assigned',
-//     owner: 'Eddie',
-//     effort: 14,
-//     created: new Date('2019-01-16'),
-//     due: new Date('2019-02-01'),
-//     title: 'Missing bottom border on panel',
-// },
-// ];
-
-
 
 const resolvers = {
     Query: {
@@ -121,7 +103,7 @@ async function connectToDb() {
 }
 
 const server = new ApolloServer({
-    typeDefs: fs.readFileSync('./server/schema.graphql', 'utf-8'),
+    typeDefs: fs.readFileSync('./schema.graphql', 'utf-8'),
     resolvers,
     formatError: error => {
         console.log(error);
@@ -131,7 +113,8 @@ const server = new ApolloServer({
 
 const app = express();
 
-app.use(express.static('public'));
+const enableCors = (process.env.ENABLE_CORS || 'true') == 'true';
+console.log('CORS setting:', enableCors);
 
 async function startServer() {
     try {
@@ -139,10 +122,10 @@ async function startServer() {
         await server.start();
         server.applyMiddleware({
             app,
-            path: '/graphql'
+            path: '/graphql', cors: enableCors
         });
-        app.listen(3001, function () {
-            console.log('App started on port 3001');
+        app.listen(port, function () {
+            console.log(`API server started on port ${port}`);
         });
     } catch (error) {
         console.error('Error during server startup:', error);

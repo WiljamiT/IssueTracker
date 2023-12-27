@@ -8,13 +8,11 @@ require('dotenv').config();
 let db;
 
 const url = process.env.DB_URL;
-
 const port = process.env.API_SERVER_PORT;
 
 const express = require('express');
-const {
-    ApolloServer, UserInputError
-} = require('apollo-server-express');
+const { ApolloServer, UserInputError } = require('apollo-server-express');
+const cors = require('cors');
 
 let aboutMessage = "Issue Tracker API v1.0";
 
@@ -39,13 +37,13 @@ const GraphQLDate = new GraphQLScalarType({
 function validateIssue(_, { issue }) {
     const errors = [];
     if (issue.title.length < 3) {
-    errors.push('Field "title" must be at least 3 characters long.')
+        errors.push('Field "title" must be at least 3 characters long.');
     }
     if (issue.status == 'Assigned' && !issue.owner) {
-    errors.push('Field "owner" is required when status is "Assigned"');
+        errors.push('Field "owner" is required when status is "Assigned"');
     }
     if (errors.length > 0) {
-    throw new UserInputError('Invalid input(s)', { errors });
+        throw new UserInputError('Invalid input(s)', { errors });
     }
 }
 
@@ -61,30 +59,25 @@ const resolvers = {
     GraphQLDate,
 };
 
-function setAboutMessage(_, {
-    message
-}) {
+function setAboutMessage(_, { message }) {
     return aboutMessage = message;
 }
 
 async function getNextSequence(name) {
     const result = await db.collection('counters').findOneAndUpdate(
-    { _id: name },
-    { $inc: { current: 1 } },
-    { returnOriginal: false },
+        { _id: name },
+        { $inc: { current: 1 } },
+        { returnOriginal: false },
     );
     return result.value.current;
-    }
+}
 
 async function issueAdd(_, args) {
     validateIssue(_, args);
     const { issue } = args;
     issue.created = new Date();
-    //issue.id = issuesDB.length + 1;
     issue.id = await getNextSequence('issues');
-    //issuesDB.push(issue);
     const result = await db.collection('issues').insertOne(issue);
-    //return issue;
     const savedIssue = await db.collection('issues')
         .findOne({ _id: result.insertedId });
     return savedIssue;
@@ -122,7 +115,8 @@ async function startServer() {
         await server.start();
         server.applyMiddleware({
             app,
-            path: '/graphql', cors: enableCors
+            path: '/graphql',
+            cors: enableCors
         });
         app.listen(port, function () {
             console.log(`API server started on port ${port}`);

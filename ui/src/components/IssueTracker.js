@@ -1,7 +1,9 @@
+/* eslint react/no-multi-comp: "off" */
+
 import React, { useEffect, useState } from 'react';
 import IssueAdd from './IssueAdd';
 import IssueTable from './IssueTable';
-import { addIssue } from './utils/issueUtils';
+import addIssue from './utils/issueUtils';
 
 const dateRegex = new RegExp('^\\d\\d\\d\\d-\\d\\d-\\d\\d');
 
@@ -22,18 +24,18 @@ async function graphQLFetch(query, variables = {}) {
     const result = JSON.parse(body, jsonDateReviver);
 
     if (result.errors) {
-      const error = result.errors[0];
-      if (error.extensions && error.extensions.code === 'BAD_USER_INPUT') {
-        const details = error.extensions.exception.errors.join('\n ');
-        alert(`${error.message}:\n ${details}`);
+      const graphqlError = result.errors[0];
+      if (graphqlError.extensions && graphqlError.extensions.code === 'BAD_USER_INPUT') {
+        const details = graphqlError.extensions.exception.errors.join('\n ');
+        console.log(`${graphqlError.message}:\n ${details}`);
       } else {
-        alert(`${error.extensions ? error.extensions.code : 'Error'}: ${error.message}`);
+        console.log(`${graphqlError.extensions ? graphqlError.extensions.code : 'Error'}: ${graphqlError.message}`);
       }
     }
 
     return result.data;
   } catch (e) {
-    alert(`Error in sending data to server: ${e.message}`);
+    console.log(`Error in sending data to server: ${e.message}`);
     throw e;
   }
 }
@@ -56,8 +58,8 @@ const IssueTracker = () => {
       const data = await graphQLFetch(query);
       setIssues(data.issueList);
       setError(null);
-    } catch (error) {
-      setError(error.message);
+    } catch (graphqlError) {
+      setError(graphqlError.message);
     }
   };
 
@@ -85,8 +87,8 @@ const IssueTracker = () => {
       await graphQLFetch(mutation, variables);
       addIssue(issues, setIssues, newIssue);
       setError(null);
-    } catch (error) {
-      setError(error.message);
+    } catch (e) {
+      setError(e.message);
     }
   };
 

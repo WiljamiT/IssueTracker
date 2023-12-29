@@ -1,9 +1,7 @@
-import React from 'react'
+import React from 'react';
 
-const IssueList = () => {
-  return (
-    <div>IssueList</div>
-  )
-}
+const IssueList = () => (
+  <div>IssueList</div>
+);
 
-export default IssueList
+export default IssueList;

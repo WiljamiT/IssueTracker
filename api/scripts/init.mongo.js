@@ -1,19 +1,27 @@
-// Connect to the MongoDB server and use a specific database
-const conn = new Mongo();
-const db = conn.getDB('IssueTracker');
+// const conn = new Mongo();
+// const db = conn.getDB('IssueTracker');
 
-// Clear existing issues collection
+/* global db print */
+/* eslint no-restricted-globals: "off" */
 db.issues.remove({});
 
 const issuesDB = [
   {
-    id: 1, status: 'New', owner: 'Jaakko', effort: 15,
-    created: new Date('2023-12-21'), due: undefined,
+    id: 1,
+    status: 'New',
+    owner: 'Ravan',
+    effort: 5,
+    created: new Date('2019-01-15'),
+    due: undefined,
     title: 'Error in console when clicking Add',
   },
   {
-    id: 2, status: 'Assigned', owner: 'Teppo', effort: 25,
-    created: new Date('2023-12-24'), due: new Date('2019-02-01'),
+    id: 2,
+    status: 'Assigned',
+    owner: 'Eddie',
+    effort: 14,
+    created: new Date('2019-01-16'),
+    due: new Date('2019-02-01'),
     title: 'Missing bottom border on panel',
   },
 ];
